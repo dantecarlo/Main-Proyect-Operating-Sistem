@@ -3,14 +3,16 @@
 #include <sys/shm.h>
 #include <stdio.h>
 
-#define SHMSZ 27
+#define SHMSZ 10
 
-void shm_server(char num)
+void shm_server(char* num)
 {
+    printf("entra %s\n", num);
     char c;
     int shmid;
     key_t key;
     char *shm, *s;
+
 
     /*
      * We'll name our shared memory segment
@@ -41,9 +43,15 @@ void shm_server(char num)
      * other process to read.
      */
     s = shm;
-
-    *s = num;
-    printf("%s\n", *s);
+    printf("%s\n", num);
+    printf("primer numero %s\n", num);
+    int len = strlen(num);
+    printf("len %sd", len);
+    for (int i=0; i< len; i++)
+        *s++ = num[i];
+    
+    *s++;
+    printf("adri aquiii :%s\n", *s);
 
     *s = NULL;
 
@@ -67,7 +75,7 @@ void die(char *s)
 }
 
 
-#define MAXSIZE     128
+#define MAXSIZE     10
 
 struct msgbuf
 {
@@ -75,7 +83,7 @@ struct msgbuf
     char    mtext[MAXSIZE];
 };
 
-char rc_msj()
+char* rc_msj()
 {
     int msqid;
     key_t key;
@@ -100,8 +108,10 @@ main()
 {
     while(1)
     {
-        char num = rc_msj();
-        shm_server(num);
+        // char num[MAXSIZE];
+        // sprintf(num,"%s",rc_msj());
+        // printf("adri aquiii x2:%s\n", num);
+        shm_server(rc_msj());
         sleep(2);
     }
 }

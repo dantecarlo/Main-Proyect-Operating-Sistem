@@ -3,7 +3,7 @@
 #include <sys/shm.h>
 #include <stdio.h>
 
-#define SHMSZ     27
+#define SHMSZ     10
 
 
 void shm_client()

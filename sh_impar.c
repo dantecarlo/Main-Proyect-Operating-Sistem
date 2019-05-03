@@ -3,15 +3,50 @@
 #include <sys/shm.h>
 #include <stdio.h>
 
-#define SHMSZ 27
+#define MAXSIZE 10
 
-void shm_server(char num)
+
+
+
+void die(char *s)
 {
-    char c;
+  perror(s);
+  exit(1);
+}
+
+
+struct msgbuf
+{
+    long    mtype;
+    char    mtext[MAXSIZE];
+};
+
+
+main()
+{
+    while(1)
+    {
+        
+    int msqid;
+    key_t key1;
+    struct msgbuf rcvbuffer;
+
+    key1 = 1234;
+
+    if ((msqid = msgget(key1, 0666)) < 0)
+      die("msgget()");
+
+
+     //Receive an answer of message type 1.
+    if (msgrcv(msqid, &rcvbuffer, MAXSIZE, 1, 0) < 0)
+      die("msgrcv");
+    
+    printf("message recieved %s\n", rcvbuffer.mtext);
+
+    //char c;
     int shmid;
     key_t key;
     char *shm, *s;
-
     /*
      * We'll name our shared memory segment
      * "5678".
@@ -21,7 +56,7 @@ void shm_server(char num)
     /*
      * Create the segment.
      */
-    if ((shmid = shmget(key, SHMSZ, IPC_CREAT | 0666)) < 0)
+    if ((shmid = shmget(key, MAXSIZE, IPC_CREAT | 0666)) < 0)
     {
         perror("shmget");
         exit(1);
@@ -41,10 +76,16 @@ void shm_server(char num)
      * other process to read.
      */
     s = shm;
-
-    *s = num;
-    printf("%s\n", *s);
-
+    printf("primer numero %s\n", rcvbuffer.mtext);
+    printf("primer numero [0] %c\n", rcvbuffer.mtext[0]);
+    int len = strlen(rcvbuffer.mtext);
+    printf("len %d", len);
+    for (int i=0; i< len; i++)
+        *s++ = rcvbuffer.mtext[i];
+    
+    
+    printf("adri aquiii :%s\n", *s);
+    *s++;
     *s = NULL;
 
     /*
@@ -55,53 +96,7 @@ void shm_server(char num)
      */
     while (*shm != '*')
         sleep(1);
-
-    exit(0);
-}
-
-
-void die(char *s)
-{
-  perror(s);
-  exit(1);
-}
-
-#define MAXSIZE     128
-
-struct msgbuf
-{
-    long    mtype;
-    char    mtext[MAXSIZE];
-};
-
-char rc_msj()
-{
-    int msqid;
-    key_t key;
-    struct msgbuf rcvbuffer;
-
-    key = 1234;
-
-    if ((msqid = msgget(key, 0666)) < 0)
-      die("msgget()");
-
-
-     //Receive an answer of message type 1.
-    if (msgrcv(msqid, &rcvbuffer, MAXSIZE, 1, 0) < 0)
-      die("msgrcv");
-    
-    printf("%s\n", rcvbuffer.mtext);
-
-    return rcvbuffer.mtext;
-}
-
-main()
-{
-    while(1)
-    {
-        char num = rc_msj();
-        shm_server(num);
-        sleep(2);
     }
+    exit(0);
         
 }
