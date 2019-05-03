@@ -5,7 +5,7 @@
 
 #define SHMSZ 27
 
-void shm_server(int num)
+void shm_server(char num)
 {
     char c;
     int shmid;
