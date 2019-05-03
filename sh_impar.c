@@ -94,7 +94,7 @@ void shm_client()
 
     FILE *fp;
 
-    fp = fopen("/tmp/test.txt", "w+");
+    fp = fopen("test.txt", "w+");
        
 
     for (s = shm; *s != NULL; s++)
