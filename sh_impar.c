@@ -43,6 +43,7 @@ void shm_server(char num)
     s = shm;
 
     *s = num;
+    printf("%s\n", *s);
 
     *s = NULL;
 
