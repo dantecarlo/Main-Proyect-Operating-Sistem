@@ -114,9 +114,41 @@ void shm_client()
     exit(0);
 }
 
+
+#define MAXSIZE     128
+
+struct msgbuf
+{
+    long    mtype;
+    char    mtext[MAXSIZE];
+};
+
+char rc_msj()
+{
+    int msqid;
+    key_t key;
+    struct msgbuf rcvbuffer;
+
+    key = 4321;
+
+    if ((msqid = msgget(key, 0666)) < 0)
+      die("msgget()");
+
+
+     //Receive an answer of message type 1.
+    if (msgrcv(msqid, &rcvbuffer, MAXSIZE, 1, 0) < 0)
+      die("msgrcv");
+    
+    return rcvbuffer.mtext;
+}
+
 main()
 {
-    int num = 0;
-    shm_server(num);
-    shm_client();
+    while(1)
+    {
+        char num = rc_msj();
+        shm_server(num);
+        shm_client();
+        sleep(2);
+    }
 }
