@@ -90,6 +90,8 @@ char rc_msj()
     if (msgrcv(msqid, &rcvbuffer, MAXSIZE, 1, 0) < 0)
       die("msgrcv");
     
+    printf("%s\n", rcvbuffer.mtext);
+
     return rcvbuffer.mtext;
 }
 
