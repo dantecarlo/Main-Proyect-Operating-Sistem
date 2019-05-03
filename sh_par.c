@@ -114,6 +114,12 @@ void shm_client()
     exit(0);
 }
 
+void die(char *s)
+{
+  perror(s);
+  exit(1);
+}
+
 
 #define MAXSIZE     128
 
