@@ -3,8 +3,7 @@
 #include <sys/shm.h>
 #include <stdio.h>
 
-#define SHMSZ     10
-
+#define SHMSZ 10
 
 void shm_client()
 {
@@ -43,12 +42,12 @@ void shm_client()
     FILE *fp;
 
     fp = fopen("test.txt", "w+");
-       
 
     for (s = shm; *s != NULL; s++)
         fprintf(fp, *s);
-        //putchar(*s);
-    putchar('\n');
+    //putchar(*s);
+    //putchar('\n');
+    fprintf(fp, '\n');
 
     fclose(fp);
 
@@ -64,7 +63,7 @@ void shm_client()
 
 main()
 {
-    while(1)
+    while (1)
     {
         shm_client();
         sleep(2);
