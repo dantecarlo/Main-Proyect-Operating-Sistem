@@ -41,7 +41,7 @@ void shm_client()
 
     FILE *fp;
 
-    fp = fopen("impar.txt", "w+");
+    fp = fopen("impar.txt", "a");
 
     for (s = shm; *s != NULL; s++)
         fputc(*s, fp);

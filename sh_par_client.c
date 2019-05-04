@@ -41,7 +41,7 @@ void shm_client()
 
     FILE *fp;
 
-    fp = fopen("par.txt", "w+");
+    fp = fopen("par.txt", "a");
 
     for (s = shm; *s != NULL; s++)
         fputc(*s, fp);

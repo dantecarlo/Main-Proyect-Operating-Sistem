@@ -72,7 +72,7 @@ main()
         s = shm;
 
         int len = strlen(rcvbuffer.mtext);
-        printf("len %d", len);
+//        printf("len %d", len);
         for (int i = 0; i < len; i++)
             *s++ = rcvbuffer.mtext[i];
         *s = NULL;
