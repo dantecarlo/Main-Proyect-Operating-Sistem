@@ -44,10 +44,10 @@ void shm_client()
     fp = fopen("test.txt", "w+");
 
     for (s = shm; *s != NULL; s++)
-        fprintf(fp, *s);
+        fputc(*s, fp);
     //putchar(*s);
     //putchar('\n');
-    fprintf(fp, '\n');
+    fputc('\n', fp);
 
     fclose(fp);
 
