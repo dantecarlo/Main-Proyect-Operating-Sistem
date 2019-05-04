@@ -38,7 +38,7 @@ void shm_client()
     /*
      * Now read what the server put in the memory.
      */
-
+	if(!(*shm=='*')){
     FILE *fp;
 
     fp = fopen("par.txt", "a");
@@ -56,7 +56,7 @@ void shm_client()
      * segment to '*', indicating we have read 
      * the segment.
      */
-    *shm = '*';
+    *shm = '*';}
 
     //exit(0);
 }
@@ -66,6 +66,5 @@ main()
     while (1)
     {
         shm_client();
-        sleep(2);
     }
 }
