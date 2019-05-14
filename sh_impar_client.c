@@ -7,48 +7,46 @@
 
 void shm_client()
 {
-  int shmid;
-  key_t key;
-  char *shm, *s;
+    int shmid;
+    key_t key;
+    char *shm, *s;
 
-  /*
+    /*
      * We need to get the segment named
      * "5678", created by the server.
      */
-  key = 5678;
+    key = 5678;
 
-  /*
+    /*
      * Locate the segment.
      */
-  if ((shmid = shmget(key, SHMSZ, 0666)) < 0)
-  {
-    perror("shmget");
-    exit(1);
-  }
+    if ((shmid = shmget(key, SHMSZ, 0666)) < 0)
+    {
+        perror("shmget");
+        exit(1);
+    }
 
-  /*
+    /*
      * Now we attach the segment to our data space.
      */
-  if ((shm = shmat(shmid, NULL, 0)) == (char *)-1)
-  {
-    perror("shmat");
-    exit(1);
-  }
+    if ((shm = shmat(shmid, NULL, 0)) == (char *)-1)
+    {
+        perror("shmat");
+        exit(1);
+    }
 
-  /*
+    /*
      * Now read what the server put in the memory.
      */
-  if (!(*shm == '*'))
-  {
+
     FILE *fp;
 
-    fp = fopen("par.txt", "a");
+    fp = fopen("impar.txt", "a");
 
-    for (s = shm; *s != NULL; s++)
-    {
-      if (*s == '*')
-        break;
-      fputc(*s, fp);
+    for (s = shm; *s != NULL; s++){
+        if (*s == '*')
+            break;
+        fputc(*s, fp);
     }
 
     //putchar(*s);
@@ -63,15 +61,15 @@ void shm_client()
      * the segment.
      */
     *shm = '*';
-  }
 
-  //exit(0);
+    //exit(0);
 }
 
 main()
 {
-  while (1)
-  {
-    shm_client();
-  }
+    while (1)
+    {
+        shm_client();
+        sleep(2);
+    }
 }
