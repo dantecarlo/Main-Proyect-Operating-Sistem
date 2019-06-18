@@ -62,11 +62,12 @@ struct msgbuf1
 
 int main()
 {
-	int fd[2], nbytes;
+	int fd[2],fd2[2], nbytes;
 	pid_t childpid;
 	char readbuffer[MAX_BUF];
 	int c;
 	pipe(fd);
+	pipe(fd2);
 	if ((childpid = fork()) == -1)
 	{
 		perror("fork");
@@ -85,7 +86,7 @@ int main()
 			if (!scheduler.empty())
 			{
 				close(fd[0]);
-
+				close(fd2[1]);
 				// Send "number" through the output side of pipe
 				write(fd[1], scheduler.top(), (strlen(scheduler.top()) + 1));
 				scheduler.pop();//        		exit(0);
@@ -96,8 +97,10 @@ int main()
 		{ //printf("parent\n");
 			// Child process closes up output side of pipe
 			close(fd[1]);
+			close(fd2[0]);
 			// Read in a string from the pipe
 			nbytes = read(fd[0], readbuffer, sizeof(readbuffer));
+			printf("nbytes %d: ", nbytes);
 			if (strlen(readbuffer) > 0){
 				printf("Received in unnamed pipe: %s\n", readbuffer);
 			}//codigo juango

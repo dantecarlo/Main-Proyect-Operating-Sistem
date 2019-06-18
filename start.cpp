@@ -8,23 +8,22 @@
 #include <thread>
 #include <queue>
 using namespace std;
-queue<int> fifo; 
-int GS=0;
+queue<int> fifo;
+int GS = 0;
 void randomn()
 {
-	int numero = rand () % 100000;
-	fifo.push (numero);
+	int numero = rand() % 100;
+	fifo.push(numero);
 	printf("random number generated: %d\n", numero);
 }
 
 void sighandler(int signum)
 {
-	GS=signum;
-	//printf("Caught signal %d\n", signum);	
+	GS = signum;
+	//printf("Caught signal %d\n", signum);
 	thread rn(randomn);
 	rn.join();
 }
-
 
 void enviar(int signal)
 {
@@ -40,15 +39,16 @@ void enviar(int signal)
 	unlink(myfifo);
 }
 
-void desencolar ()
+void desencolar()
 {
 	while (1)
 	{
-		
-		if(fifo.size()>0){
-		enviar(fifo.front());
-		fifo.pop();
-		}		
+
+		if (fifo.size() > 0)
+		{
+			enviar(fifo.front());
+			fifo.pop();
+		}
 	}
 }
 
