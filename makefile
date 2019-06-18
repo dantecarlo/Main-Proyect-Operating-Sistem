@@ -1,5 +1,5 @@
 all:
-	gcc -o start.exe start.c
+	gcc -o start.exe start.cpp
 	gcc -o pipe_pairs.exe pipe_pairs.c
 	gcc -o pipe_impairs.exe pipe_impairs.c
 	gcc -o sh_par.exe sh_par.c 
