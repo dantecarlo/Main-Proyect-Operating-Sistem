@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <thread>
+#include <functional>
 
 #define MAXSIZE 10
 
@@ -18,34 +19,29 @@
 
 using namespace std;
 
-class mycomp
-{
-public:
-	bool operator()(char *a, char *b)
-	{
-		int n = stoi(a);
-		int m = stoi(b);
-		return a > b;
-	}
-};
-
-priority_queue<char *, vector<char *>, mycomp> scheduler;
+priority_queue<int , vector<int >,greater< int> >scheduler;
 
 void encolarenpipe()
 {
-	int fd1;
-	char *myfifo = "/tmp/myfifo";
-	char buf[MAX_BUF];
+	while (1)
+	{
+		int fd1;
+		char *myfifo = "/tmp/myfifo";
+		char buf[MAX_BUF];
 
-	/* open, read, and display the message from the FIFO */
-	fd1 = open(myfifo, O_RDONLY);
-	read(fd1, buf, MAX_BUF);
-	//			printf("parent process ha leido el mensaje\n");
-	if (strlen(buf) > 0){
-		printf("Received in named pipe: %s\n", buf);
-		scheduler.push(buf);
+		/* open, read, and display the message from the FIFO */
+		fd1 = open(myfifo, O_RDONLY);
+		read(fd1, buf, MAX_BUF);
+		
+		if (strlen(buf) > 0)
+		{	int buf1=atoi(buf);
+			printf("Received in named pipe: %s\n", buf);
+			scheduler.push(buf1);
+			printf("TOP %d\n", scheduler.top());
+		}
+		sprintf(buf, "%s", "");
+		close(fd1);
 	}
-	close(fd1);
 }
 
 void die(char *s)
@@ -62,49 +58,55 @@ struct msgbuf1
 
 int main()
 {
-	int fd[2],fd2[2], nbytes;
+	int fd[2], fd2[2], nbytes;
 	pid_t childpid;
 	char readbuffer[MAX_BUF];
+	char rb[2];
 	int c;
 	pipe(fd);
 	pipe(fd2);
+	thread e_p(encolarenpipe);
+	sleep(1);
+
 	if ((childpid = fork()) == -1)
 	{
 		perror("fork");
 		exit(1);
 	}
+	
+//	printf("size before while %d\n", scheduler.size());
 
 	while (1)
 	{
-
-		if (childpid == 0)
-		{ //printf("child\n");
-
-			thread e_p (encolarenpipe);
-			e_p.join();
-
-			if (!scheduler.empty())
+	//	if (scheduler.size() > 0)
+	//	{
+			if (childpid == 0)
 			{
-				close(fd[0]);
-				close(fd2[1]);
-				// Send "number" through the output side of pipe
-				write(fd[1], scheduler.top(), (strlen(scheduler.top()) + 1));
-				scheduler.pop();//        		exit(0);
+				while(scheduler.size()>0){
+					close(fd[0]);
+					close(fd2[1]);
+					// Send "number" through the output side of pipe
+					//printf("number: %s, size:%d\n", scheduler.top(), scheduler.size());
+					char buf[MAX_BUF];
+					sprintf(buf,"%d",scheduler.top());
+					write(fd[1], buf, (strlen(buf) + 1));
+					nbytes = read(fd[0], rb, sizeof(rb));
+					scheduler.pop(); 
+				}
 			}
-			//sprintf(buf, "%s", "");
-		}
-		else
-		{ //printf("parent\n");
-			// Child process closes up output side of pipe
-			close(fd[1]);
-			close(fd2[0]);
-			// Read in a string from the pipe
-			nbytes = read(fd[0], readbuffer, sizeof(readbuffer));
-			printf("nbytes %d: ", nbytes);
-			if (strlen(readbuffer) > 0){
-				printf("Received in unnamed pipe: %s\n", readbuffer);
-			}//codigo juango
-			/*    int msqid;
+			else
+			{ 
+				close(fd[1]);
+				close(fd2[0]);
+				// Read in a string from the pipe
+				nbytes = read(fd[0], readbuffer, sizeof(readbuffer));
+				write(fd2[1], "ok", (strlen("ok") + 1));
+				//printf("nbytes %d: \n", nbytes);
+				if (strlen(readbuffer) > 0)
+				{
+					printf("Received in unnamed pipe: %s\n", readbuffer);
+				} //codigo juango
+				/*    int msqid;
         int msgflg = IPC_CREAT | 0666;
         key_t key;
         struct msgbuf sbuf;
@@ -133,11 +135,13 @@ int main()
 
         else
             printf("Message Sent\n");*/
-		}
+			}
 
-		//end juango
+			//end juango
 
-		//sleep(2);
+			//sleep(2);
+		//}
 	}
+	e_p.join();
 	return 0;
 }
