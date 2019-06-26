@@ -20,10 +20,10 @@
 using namespace std;
 
 priority_queue<int, vector<int>, greater<int>> scheduler;
-
+vector<int> scherand;
 void encolarenpipe()
 {
-		
+	for (int i=0;i<3;i++){
 	int fd1;
 	char *myfifo = "/tmp/myfifo";
 	char buf[MAX_BUF];
@@ -41,7 +41,11 @@ void encolarenpipe()
 	}
 	sprintf(buf, "%s", "");
 	close(fd1);
-	
+	}
+}
+
+void desencolar()
+{
 }
 
 void die(char *s)
@@ -71,10 +75,9 @@ int main()
 		exit(1);
 	}
 
-
 	while (1)
 	{
-		
+
 		if (childpid == 0)
 		{
 
@@ -88,62 +91,63 @@ int main()
 			{
 				sprintf(buf, "%d", scheduler.top());
 				write(fd[1], buf, (strlen(buf) + 1));
-				//nbytes = read(fd2[0], rb, sizeof(rb));
-				while(strlen(rb)!=2){
-					nbytes = read(fd2[0], rb, sizeof(rb));
-					
+				nbytes = read(fd2[0], rb, sizeof(rb));
+				if (strcmp(rb, buf) != 0)
+				{
+					//	nbytes = read(fd2[0], rb, sizeof(rb));
 				}
-			
-				sprintf(rb, "%s", "");
-				scheduler.pop();
+				else
+					scheduler.pop();
 			}
 		}
 		else
 		{
+			//thread td(desencolar);
+	
 			close(fd[1]);
 			close(fd2[0]);
 			// Read in a string from the pipe
 			nbytes = read(fd[0], readbuffer, sizeof(readbuffer));
+			sleep(0.6);
 			if (strlen(readbuffer) > 0)
 			{
+				int num;
+				num = atoi(readbuffer);
+				scherand.push_back(num);
 				printf("Received in unnamed pipe: %s\n", readbuffer);
-				write(fd2[1], "ok", (strlen("ok")+1));
-			} //codigo juango
-				/*    int msqid;
-        int msgflg = IPC_CREAT | 0666;
-        key_t key;
-        struct msgbuf sbuf;
-        size_t buflen;
+				int msqid;
+				int msgflg = IPC_CREAT | 0666;
+				key_t key;
+				struct msgbuf sbuf;
+				size_t buflen;
 
-        key = 4321;
+				key = 4321;
 
-        if ((msqid = msgget(key, msgflg )) < 0)   //Get the message queue ID for the given key
-          die("msgget");
+				if ((msqid = msgget(key, msgflg)) < 0) //Get the message queue ID for the given key
+					die("msgget");
 
-        //Message Type
-        sbuf.mtype = 1;
+				//Message Type
+				sbuf.mtype = 1;
 
-//        printf("Enter a message to add to message queue : ");
-//        scanf("%[^\n]",sbuf.mtext);
-        //        getchar();
-        sprintf(sbuf.mtext,"%s",readbuffer);//sbuf.mtext = readbuffer;
-        buflen = strlen(sbuf.mtext) + 1 ;
+				//        printf("Enter a message to add to message queue : ");
+				//        scanf("%[^\n]",sbuf.mtext);
+				//        getchar();
+				sprintf(sbuf.mtext, "%s", readbuffer); //sbuf.mtext = readbuffer;
+				buflen = strlen(sbuf.mtext) + 1;
 
-        if (msgsnd(msqid, &sbuf, buflen, IPC_NOWAIT) < 0)
-        {
-            printf ("%d, %ld, %s, %d \n", msqid, sbuf.mtype, sbuf.mtext, (int)buflen);
-            
-            die("msgsnd");
-        }
+				if (msgsnd(msqid, &sbuf, buflen, IPC_NOWAIT) < 0)
+				{
+					printf("%d, %ld, %s, %d \n", msqid, sbuf.mtype, sbuf.mtext, (int)buflen);
+					die("msgsnd");
+				}
 
-        else
-            printf("Message Sent\n");*/
+				else
+				{
+					printf("Message Sent\n");
+					write(fd2[1], readbuffer, (strlen(readbuffer) + 1));
+				}
+			}
 		}
-
-		//end juango
-
-		//sleep(2);
-		//}
 	}
 
 	return 0;
