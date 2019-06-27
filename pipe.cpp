@@ -20,32 +20,34 @@
 using namespace std;
 
 priority_queue<int, vector<int>, greater<int>> scheduler;
-vector<int> scherand;
+priority_queue<int, vector<int>, less<int>> scherand;
 void encolarenpipe()
 {
-	for (int i=0;i<3;i++){
-	int fd1;
-	char *myfifo = "/tmp/myfifo";
-	char buf[MAX_BUF];
-
-	/* open, read, and display the message from the FIFO */
-	fd1 = open(myfifo, O_RDONLY);
-	read(fd1, buf, MAX_BUF);
-
-	if (strlen(buf) > 0)
+	for (int i = 0; i < 3; i++)
 	{
-		int buf1 = atoi(buf);
-		printf("Received in named pipe: %s\n", buf);
-		scheduler.push(buf1);
-		//printf("TOP %d\n", scheduler.top());
-	}
-	sprintf(buf, "%s", "");
-	close(fd1);
+		int fd1;
+		char *myfifo = "/tmp/myfifo";
+		char buf[MAX_BUF];
+
+		/* open, read, and display the message from the FIFO */
+		fd1 = open(myfifo, O_RDONLY);
+		read(fd1, buf, MAX_BUF);
+
+		if (strlen(buf) > 0)
+		{
+			int buf1 = atoi(buf);
+			printf("Received in named pipe: %s\n", buf);
+			scheduler.push(buf1);
+			//printf("TOP %d\n", scheduler.top());
+		}
+		sprintf(buf, "%s", "");
+		close(fd1);
 	}
 }
 
-void desencolar()
+void encolar2(int num)
 {
+	scherand.push(num);
 }
 
 void die(char *s)
@@ -103,17 +105,19 @@ int main()
 		else
 		{
 			//thread td(desencolar);
-	
+
 			close(fd[1]);
 			close(fd2[0]);
 			// Read in a string from the pipe
 			nbytes = read(fd[0], readbuffer, sizeof(readbuffer));
-			sleep(0.6);
+			
 			if (strlen(readbuffer) > 0)
 			{
-				int num;
+				int num; 
 				num = atoi(readbuffer);
-				scherand.push_back(num);
+				thread enc(encolar2, num);
+				enc.join();
+				//scherand.push_back(num);
 				printf("Received in unnamed pipe: %s\n", readbuffer);
 				int msqid;
 				int msgflg = IPC_CREAT | 0666;
@@ -132,19 +136,24 @@ int main()
 				//        printf("Enter a message to add to message queue : ");
 				//        scanf("%[^\n]",sbuf.mtext);
 				//        getchar();
-				sprintf(sbuf.mtext, "%s", readbuffer); //sbuf.mtext = readbuffer;
-				buflen = strlen(sbuf.mtext) + 1;
-
-				if (msgsnd(msqid, &sbuf, buflen, IPC_NOWAIT) < 0)
+				if (scherand.size() > 0)
 				{
-					printf("%d, %ld, %s, %d \n", msqid, sbuf.mtype, sbuf.mtext, (int)buflen);
-					die("msgsnd");
-				}
+					sprintf(sbuf.mtext, "%d", scherand.top()); //sbuf.mtext = readbuffer;
+					buflen = strlen(sbuf.mtext) + 1;
 
-				else
-				{
-					printf("Message Sent\n");
-					write(fd2[1], readbuffer, (strlen(readbuffer) + 1));
+					if (msgsnd(msqid, &sbuf, buflen, IPC_NOWAIT) < 0)
+					{
+						printf("%d, %ld, %s, %d \n", msqid, sbuf.mtype, sbuf.mtext, (int)buflen);
+						die("msgsnd");
+					}
+					
+
+					else
+					{
+						printf("Message Sent\n");
+						write(fd2[1], readbuffer, (strlen(readbuffer) + 1));
+					}
+					scherand.pop();
 				}
 			}
 		}

@@ -1,7 +1,7 @@
 all:
 	g++ -o start.exe start.cpp -lpthread
 	g++ -o pipe.exe pipe.cpp -lpthread
-	gcc -o sh_par.exe sh_par.c 
+	g++ -o sh.exe sh.cpp -lpthread
 	gcc -o sh_par_client.exe sh_par_client.c 
 
 clean:
