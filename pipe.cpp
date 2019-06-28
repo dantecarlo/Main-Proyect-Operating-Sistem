@@ -12,6 +12,8 @@
 #include <string>
 #include <thread>
 #include <functional>
+#include <mutex>
+
 
 #define MAXSIZE 10
 
@@ -30,8 +32,11 @@ void encolarenpipe()
 		char buf[MAX_BUF];
 
 		/* open, read, and display the message from the FIFO */
+		
 		fd1 = open(myfifo, O_RDONLY);
+		
 		read(fd1, buf, MAX_BUF);
+		
 
 		if (strlen(buf) > 0)
 		{
@@ -42,6 +47,7 @@ void encolarenpipe()
 		}
 		sprintf(buf, "%s", "");
 		close(fd1);
+		//unlink(myfifo);
 	}
 }
 

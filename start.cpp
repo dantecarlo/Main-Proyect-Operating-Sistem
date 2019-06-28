@@ -41,8 +41,8 @@ void enviar(int signal)
 	}*/
 	printf("number %s sent\n", send_);
 	close(fd);
-	unlink(myfifo);
-	sleep(0.1);
+	//unlink(myfifo);
+	//sleep(0.1);
 }
 
 void desencolar()
