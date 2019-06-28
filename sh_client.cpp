@@ -53,7 +53,7 @@ void shm_client()
     fp = fopen("numbers.txt", "a");
 
     for (s = shm; *s != NULL; s++){
-        if (*s == '*')
+        if (*s == '*' || *s == ' ')
         break;
         fputc(*s, fp);
     }
