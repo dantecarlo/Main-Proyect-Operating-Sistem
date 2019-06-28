@@ -33,7 +33,7 @@ void enviar(int signal)
 	sprintf(send_, "%d", signal);
 	char *myfifo = "/tmp/myfifo";
 	mkfifo(myfifo, 0666);
-	fd = open(myfifo, O_WRONLY);
+	fd = open(myfifo, O_WRONLY | O_NONBLOCK);
 	int w=write(fd, send_, sizeof(send_));
 	/*if (w==0)
 	{

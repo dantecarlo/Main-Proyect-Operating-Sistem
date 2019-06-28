@@ -32,7 +32,7 @@ void encolarenpipe()
 
 		/* open, read, and display the message from the FIFO */
 		
-		fd1 = open(myfifo, O_RDONLY | O_NONBLOCK);
+		fd1 = open(myfifo, O_RDONLY );
 		
 		read(fd1, buf, MAX_BUF);
 		
