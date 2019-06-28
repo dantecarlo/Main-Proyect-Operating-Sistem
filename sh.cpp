@@ -44,6 +44,36 @@ void encolar()
 
 void desencolar()
 {
+
+    /*
+     * Now put some things into the memory for the
+     * other process to read.
+     */
+    if (scheduler.size() > 0)
+    {
+        s = shm;
+        char buf[MAXSIZE];
+        sprintf(buf, "%d", scheduler.top());
+        int len = strlen(buf);
+        for (int i = 0; i < len; i++)
+            *s++ = buf[i];
+        *s = NULL;
+        //printf("wrotten in sh: %s\n", buf);
+
+        while (*shm != '*')
+        {
+        }
+    }
+}
+
+struct msgbuf1
+{
+    long mtype;
+    char mtext[MAXSIZE];
+};
+
+main()
+{
     key = 5679;
 
     // Create the segment.
@@ -61,37 +91,16 @@ void desencolar()
         perror("shmat");
         exit(1);
     }
-
-    /*
-     * Now put some things into the memory for the
-     * other process to read.
-     */
-    s = shm;
-    char buf[MAXSIZE];
-    sprintf(buf,"%d",scheduler.top());
-    int len = strlen(buf);
-    for (int i = 0; i < len; i++)
-        *s++ = buf[i];
-    *s = NULL;
-    printf("wrotten in sh: %s\n",buf);
-    while (*shm != '*')
-        sleep(0.5);
-}
-
-struct msgbuf1
-{
-    long mtype;
-    char mtext[MAXSIZE];
-};
-
-main()
-{
     while (1)
     {
 
-        thread e(encolar);
+        thread threads[3];
+			for (int i = 0; i < 3; i++)
+	{ 
+			threads[i]=thread (encolar);
+			threads[i].join();
+	}
         thread d(desencolar);
-        e.join();
         d.join();
     }
     exit(0);

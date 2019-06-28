@@ -13,17 +13,47 @@
 using namespace std;
 
 #define SHMSZ 10
-
-void shm_client()
-{
-    int shmid;
+int shmid;
     key_t key;
     char *shm, *s;
+void shm_client()
+{
+    /*
+     * Now read what the server put in the memory.
+     */
+
+    FILE *fp;
+
+    fp = fopen("numbers.txt", "a");
+    bool b=0;
+    for (s = shm; *s != NULL; s++){
+        if (*s == '*' || *s == ' '){
+        b=1;
+        break;
+        }
+        fputc(*s, fp);
+    }
+        
+    //putchar(*s);
+    //putchar('\n');
+    if(b==0)
+        fputc('\n', fp);
+
+    fclose(fp);
 
     /*
-     * We need to get the segment named
-     * "5678", created by the server.
+     * Finally, change the first character of the 
+     * segment to '*', indicating we have read 
+     * the segment.
      */
+    *shm = '*';
+    
+
+    //exit(0);
+}
+
+main()
+{
     key = 5679;
 
     /*
@@ -43,42 +73,9 @@ void shm_client()
         perror("shmat");
         exit(1);
     }
-
-    /*
-     * Now read what the server put in the memory.
-     */
-
-    FILE *fp;
-
-    fp = fopen("numbers.txt", "a");
-
-    for (s = shm; *s != NULL; s++){
-        if (*s == '*' || *s == ' ')
-        break;
-        fputc(*s, fp);
-    }
-        
-    //putchar(*s);
-    //putchar('\n');
-    fputc('\n', fp);
-
-    fclose(fp);
-
-    /*
-     * Finally, change the first character of the 
-     * segment to '*', indicating we have read 
-     * the segment.
-     */
-    *shm = '*';
-
-    //exit(0);
-}
-
-main()
-{
     while (1)
     {
         shm_client();
-        sleep(2);
+       
     }
 }

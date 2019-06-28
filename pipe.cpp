@@ -25,15 +25,14 @@ priority_queue<int, vector<int>, greater<int>> scheduler;
 priority_queue<int, vector<int>, less<int>> scherand;
 void encolarenpipe()
 {
-	for (int i = 0; i < 3; i++)
-	{
+	
 		int fd1;
 		char *myfifo = "/tmp/myfifo";
 		char buf[MAX_BUF];
 
 		/* open, read, and display the message from the FIFO */
 		
-		fd1 = open(myfifo, O_RDONLY);
+		fd1 = open(myfifo, O_RDONLY | O_NONBLOCK);
 		
 		read(fd1, buf, MAX_BUF);
 		
@@ -48,12 +47,17 @@ void encolarenpipe()
 		sprintf(buf, "%s", "");
 		close(fd1);
 		//unlink(myfifo);
-	}
+	//}
 }
 
 void encolar2(int num)
 {
 	scherand.push(num);
+}
+
+void desencolar2()
+{
+	
 }
 
 void die(char *s)
@@ -88,40 +92,45 @@ int main()
 
 		if (childpid == 0)
 		{
-
-			thread e_p(encolarenpipe);
-			e_p.join();
+			thread threads[3];
+			for (int i = 0; i < 3; i++)
+	{ 
+			threads[i]=thread (encolarenpipe);
+			threads[i].join();
+	}
+	//		printf("size: %d\n",scheduler.size());
 			close(fd[0]);
-			close(fd2[1]);
 			// Send "number" through the output side of pipe
 			char buf[MAX_BUF];
 			if (scheduler.size() > 0)
 			{
 				sprintf(buf, "%d", scheduler.top());
+				sprintf(rb, "%s", "");
 				write(fd[1], buf, (strlen(buf) + 1));
-				nbytes = read(fd2[0], rb, sizeof(rb));
-				if (strcmp(rb, buf) != 0)
+				//nbytes = read(fd2[0], rb, sizeof(rb));
+				while (strcmp(rb, buf) != 0)
 				{
-					//	nbytes = read(fd2[0], rb, sizeof(rb));
+					nbytes = read(fd2[0], rb, sizeof(rb));
 				}
-				else
-					scheduler.pop();
+				//else
+				scheduler.pop();
 			}
 		}
 		else
 		{
 			//thread td(desencolar);
-
+			sprintf(readbuffer, "%s", "");
 			close(fd[1]);
-			close(fd2[0]);
 			// Read in a string from the pipe
 			nbytes = read(fd[0], readbuffer, sizeof(readbuffer));
-			
+			//printf("LEIDO\n");
 			if (strlen(readbuffer) > 0)
 			{
+			//	printf("ENTRAAAAAAA\n");
 				int num; 
 				num = atoi(readbuffer);
 				thread enc(encolar2, num);
+				write(fd2[1], readbuffer, (strlen(readbuffer) + 1));
 				enc.join();
 				//scherand.push_back(num);
 				printf("Received in unnamed pipe: %s\n", readbuffer);
@@ -157,9 +166,10 @@ int main()
 					else
 					{
 						printf("Message Sent\n");
-						write(fd2[1], readbuffer, (strlen(readbuffer) + 1));
+						
+						scherand.pop();
 					}
-					scherand.pop();
+					
 				}
 			}
 		}
