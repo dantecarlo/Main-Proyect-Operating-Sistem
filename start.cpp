@@ -27,16 +27,22 @@ void sighandler(int signum)
 
 void enviar(int signal)
 {
+	
 	int fd;
 	char send_[10];
 	sprintf(send_, "%d", signal);
 	char *myfifo = "/tmp/myfifo";
 	mkfifo(myfifo, 0666);
-	fd = open(myfifo, O_WRONLY);
-	write(fd, send_, sizeof(send_));
+	fd = open(myfifo, O_WRONLY | O_NONBLOCK);
+	int w=write(fd, send_, sizeof(send_));
+	/*if (w==0)
+	{
+		perror("Error: ");
+	}*/
 	printf("number %s sent\n", send_);
 	close(fd);
-	unlink(myfifo);
+	//unlink(myfifo);
+	//sleep(0.1);
 }
 
 void desencolar()
